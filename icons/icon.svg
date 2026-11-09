@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#11804f"/>
+      <stop offset="1" stop-color="#084028"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <g transform="rotate(-13 256 266)">
+    <rect x="132" y="116" width="200" height="280" rx="22" fill="#fdfdfb"/>
+    <rect x="146" y="130" width="172" height="252" rx="12" fill="#1e4fa3"/>
+  </g>
+  <g transform="rotate(9 256 266)">
+    <rect x="186" y="130" width="200" height="280" rx="22" fill="#000" opacity=".25" transform="translate(4 8)"/>
+    <rect x="186" y="130" width="200" height="280" rx="22" fill="#fdfdfb"/>
+    <text x="204" y="196" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="62" fill="#1b1d21">A</text>
+    <path transform="translate(226 220) scale(1.2)" fill="#1b1d21"
+      d="M50 6C38 22 12 38 12 60c0 13 10 22 22 22 7 0 12-3 15-8-1 9-5 16-12 20h26c-7-4-11-11-12-20 3 5 8 8 15 8 12 0 22-9 22-22C88 38 62 22 50 6Z"/>
+  </g>
+</svg>

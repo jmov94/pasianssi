@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b5a37">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Pasianssi">
+  <meta name="description" content="Klondike-pasianssi, joka toimii myös ilman verkkoyhteyttä.">
+  <title>Pasianssi</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="board" aria-label="Pelilauta"></main>
+
+  <nav class="bar">
+    <button id="new" type="button">Uusi peli</button>
+    <button id="undo" type="button">Kumoa</button>
+    <div class="info">
+      <span id="moves">Siirrot 0</span>
+      <span id="time">0:00</span>
+    </div>
+  </nav>
+
+  <div id="overlay" class="overlay" hidden>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-title">
+      <h1 id="dlg-title">Uusi peli</h1>
+      <p id="dlg-text"></p>
+      <p id="dlg-stats" class="stats"></p>
+      <div class="buttons">
+        <button type="button" data-draw="1">Nosta 1 kortti</button>
+        <button type="button" data-draw="3">Nosta 3 korttia</button>
+        <button type="button" id="close" class="secondary">Peruuta</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

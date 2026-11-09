@@ -1,0 +1,174 @@
+:root {
+  --felt: #0b5a37;
+  --felt-dark: #063521;
+  --text: #f2f5f3;
+  --muted: #b7d1c2;
+  --red: #c8102e;
+  --black: #1b1d21;
+  --card: #fdfdfb;
+  --back: #1e4fa3;
+  --back-2: #183f85;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; }
+
+body {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+  background: radial-gradient(ellipse at 50% 25%, var(--felt), var(--felt-dark));
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  overscroll-behavior: none;
+}
+
+/* Pelilauta: kortit ja paikat sijoitetaan JS:llä (transform) */
+#board {
+  flex: 1;
+  position: relative;
+  z-index: 0;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.slot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--cw);
+  height: var(--ch);
+  border-radius: var(--r);
+  border: 2px solid rgba(255, 255, 255, .16);
+  display: grid;
+  place-items: center;
+  color: rgba(255, 255, 255, .22);
+  font-size: calc(var(--cw) * .4);
+  font-weight: 700;
+}
+.slot[data-pile="stock"] { cursor: pointer; font-size: calc(var(--cw) * .55); font-weight: 400; }
+
+.card {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--cw);
+  height: var(--ch);
+  border-radius: var(--r);
+  background: var(--card);
+  border: 1px solid rgba(0, 0, 0, .2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .35);
+  transition: transform .22s ease;
+  will-change: transform;
+  cursor: pointer;
+}
+.card.red { color: var(--red); }
+.card.black { color: var(--black); }
+
+.card .rank,
+.card .s1,
+.card .s2 { position: absolute; line-height: 1; pointer-events: none; }
+.card .rank {
+  top: 5%;
+  left: 7%;
+  font-size: calc(var(--cw) * .34);
+  font-weight: 700;
+  letter-spacing: -.05em;
+}
+.card .s1 { top: 6%; right: 7%; font-size: calc(var(--cw) * .3); }
+.card .s2 { left: 0; right: 0; bottom: 9%; text-align: center; font-size: calc(var(--cw) * .62); }
+
+/* Kortin selkä */
+.card.down {
+  background: repeating-linear-gradient(45deg, var(--back) 0 4px, var(--back-2) 4px 8px);
+  box-shadow: inset 0 0 0 calc(var(--cw) * .05) var(--card), 0 1px 3px rgba(0, 0, 0, .35);
+}
+.card.down > * { display: none; }
+
+.card.dragging { transition: none; box-shadow: 0 8px 18px rgba(0, 0, 0, .45); }
+.card.flying { pointer-events: none; }
+.card.flip { animation: flip .22s ease-out; }
+.card.shake { animation: shake .3s; }
+@keyframes flip { from { scale: 0 1; } to { scale: 1 1; } }
+@keyframes shake { 25% { translate: -4px 0; } 75% { translate: 4px 0; } }
+
+.instant .card { transition: none !important; }
+.scatter .card { transition-duration: .9s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .card { transition: none; }
+  .card.flip, .card.shake { animation: none; }
+}
+
+/* Alapalkki */
+.bar {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem .75rem calc(.5rem + env(safe-area-inset-bottom));
+  background: rgba(0, 0, 0, .25);
+}
+.bar button {
+  font: inherit;
+  font-size: .95rem;
+  font-weight: 600;
+  color: var(--text);
+  background: rgba(255, 255, 255, .13);
+  border: 0;
+  border-radius: 999px;
+  padding: .55rem 1rem;
+  cursor: pointer;
+}
+.bar button:active { background: rgba(255, 255, 255, .24); }
+.bar button:disabled { opacity: .4; cursor: default; }
+.info {
+  margin-left: auto;
+  display: flex;
+  gap: .9rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Valintaikkuna */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, .45);
+}
+.overlay[hidden] { display: none; }
+.dialog {
+  width: min(20rem, 100%);
+  padding: 1.4rem;
+  border-radius: 16px;
+  background: #fff;
+  color: var(--black);
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, .4);
+}
+.dialog h1 { margin: 0 0 .4rem; font-size: 1.4rem; }
+.dialog p { margin: 0 0 .6rem; color: #4d5560; }
+.dialog p:empty { display: none; }
+.dialog .stats { font-size: .9rem; color: #6b7480; margin-bottom: 1.1rem; }
+.dialog .buttons { display: grid; gap: .5rem; margin-top: 1rem; }
+.dialog button {
+  font: inherit;
+  font-weight: 600;
+  padding: .75rem;
+  border: 0;
+  border-radius: 10px;
+  background: var(--felt);
+  color: #fff;
+  cursor: pointer;
+}
+.dialog button.secondary { background: #e9ecef; color: var(--black); }
