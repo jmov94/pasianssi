@@ -427,8 +427,15 @@
     $('dlg-stats').textContent = st.played
       ? `Voitot ${st.won} / ${st.played}` + (st.best ? ` · paras aika ${fmt(st.best)}` : '')
       : '';
+    $('dlg-offline').textContent = offlineStatus();
     $('close').textContent = won ? 'Sulje' : 'Peruuta';
     overlay.hidden = false;
+  }
+
+  function offlineStatus() {
+    if (!('serviceWorker' in navigator)) return 'Ilman verkkoa pelaaminen vaatii HTTPS-osoitteen.';
+    if (navigator.serviceWorker.controller) return '\u2713 Toimii ilman verkkoa';
+    return 'Offline-tila ei ole vielä valmis: pidä peli auki hetki verkkoyhteyden ollessa päällä.';
   }
 
   function hideDialog() { overlay.hidden = true; }
@@ -609,5 +616,7 @@
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => { /* ilman offline-tukea */ });
+    // Pyydetään, ettei selain siivoa tallennettuja tiedostoja pois
+    if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
   }
 })();

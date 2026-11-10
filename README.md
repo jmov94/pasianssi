@@ -40,6 +40,11 @@ Asennus puhelimeen:
 - **Android (Chrome)**: valikko ⋮ → *Asenna sovellus* tai *Lisää aloitusnäytölle*
 - **iPhone (Safari)**: Jaa-painike → *Lisää Koti-valikkoon*
 
+Avaa asennettu sovellus kerran **Koti-valikosta verkkoyhteyden ollessa päällä** ja pidä sitä auki
+hetki. iPhonessa Koti-valikon sovelluksella on oma tallennustilansa erillään Safarista, joten
+offline-tiedostot tallentuvat vasta tällä avauksella. *Uusi peli* -ikkunassa lukee
+**✓ Toimii ilman verkkoa**, kun sovellus on valmis käytettäväksi ilman verkkoa.
+
 ## Päivittäminen
 
 Asennettu sovellus avautuu heti välimuistista ja hakee uudet tiedostot taustalla, joten muutokset
