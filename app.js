@@ -253,45 +253,83 @@
 
   function colX(i) { return L.ox + i * (L.cw + L.gap); }
 
+  // Kaksi asettelua:
+  // - kapea (pysty): pakka ja pohjapinot ylärivissä, pöytä niiden alla
+  // - leveä (vaaka): pakka vasemmalla, pöytä keskellä koko korkeudelta, pohjapinot oikealla
   function layout() {
     const W = board.clientWidth;
     const H = board.clientHeight;
-    const gap = Math.round(Math.max(4, Math.min(14, W * 0.014)));
-    const cw = Math.floor(Math.max(20, Math.min((W - gap * 8) / 7, (H - gap * 3) / (1.4 * 4.2), 130)));
+    const gap = Math.round(Math.max(4, Math.min(14, Math.min(W, H * 1.6) * 0.014)));
+    const side = W > H * 1.3;
+    const cols = side ? 9 : 7;
+    const byWidth = (W - gap * (cols + 1)) / cols;
+    const byHeight = side ? (H - gap * 5) / (4 * 1.4) : (H - gap * 3) / (1.4 * 4.2);
+    const cw = Math.floor(Math.max(20, Math.min(byWidth, byHeight, 130)));
     const ch = Math.round(cw * 1.4);
-    const ox = Math.round((W - (7 * cw + 6 * gap)) / 2);
-    L = { W, H, gap, cw, ch, ox, top: gap, tabY: Math.round(gap * 2.5 + ch) };
+    const ox = Math.round((W - (cols * cw + (cols - 1) * gap)) / 2);
+    L = { W, H, gap, cw, ch, ox, side, top: gap, tabY: side ? gap : Math.round(gap * 2.5 + ch) };
     board.style.setProperty('--cw', cw + 'px');
     board.style.setProperty('--ch', ch + 'px');
     board.style.setProperty('--r', Math.max(3, Math.round(cw * 0.08)) + 'px');
-    const place = (k, x, y) => { slots[k].style.transform = `translate(${x}px, ${y}px)`; };
-    place('stock', colX(0), L.top);
-    FOUND.forEach((f, i) => place(f, colX(3 + i), L.top));
-    TAB.forEach((t, i) => place(t, colX(i), L.tabY));
+    for (const k of ['stock', ...FOUND, ...TAB]) {
+      const b = base(k);
+      slots[k].style.transform = `translate(${b.x}px, ${b.y}px)`;
+    }
+  }
+
+  // Pinon peruspaikka (alimman kortin kohta)
+  function base(pile) {
+    const n = Number(pile[1]);
+    if (L.side) {
+      if (pile === 'stock') return { x: colX(0), y: L.top };
+      if (pile === 'waste') return { x: colX(0), y: L.top + L.ch + L.gap };
+      if (pile[0] === 'f') return { x: colX(8), y: L.top + n * (L.ch + L.gap) };
+      return { x: colX(n + 1), y: L.tabY };
+    }
+    if (pile === 'stock') return { x: colX(0), y: L.top };
+    if (pile === 'waste') return { x: colX(1), y: L.top };
+    if (pile[0] === 'f') return { x: colX(3 + n), y: L.top };
+    return { x: colX(n), y: L.tabY };
   }
 
   // Jokaisen kortin paikka ja pinoamisjärjestys nykyisessä tilassa
   function positions() {
     const pos = [];
     const { stock, waste } = S.piles;
-    stock.forEach((c, i) => { pos[c] = { x: colX(0), y: L.top, z: 1 + i }; });
+    const sb = base('stock');
+    stock.forEach((c, i) => { pos[c] = { x: sb.x, y: sb.y, z: 1 + i }; });
+    // Nosta 3: kolme päällimmäistä viuhkana, vaakatasossa alaspäin
+    const wb = base('waste');
     const fanFrom = Math.max(0, waste.length - (S.draw === 3 ? 3 : 1));
     waste.forEach((c, i) => {
-      pos[c] = { x: Math.round(colX(1) + Math.max(0, i - fanFrom) * L.cw * 0.28), y: L.top, z: 100 + i };
+      const f = Math.max(0, i - fanFrom);
+      pos[c] = L.side
+        ? { x: wb.x, y: Math.round(wb.y + f * L.ch * 0.3), z: 100 + i }
+        : { x: Math.round(wb.x + f * L.cw * 0.28), y: wb.y, z: 100 + i };
     });
-    FOUND.forEach((f, k) => S.piles[f].forEach((c, i) => { pos[c] = { x: colX(3 + k), y: L.top, z: 200 + i }; }));
-    const avail = L.H - L.tabY - L.ch - L.gap;
-    TAB.forEach((t, k) => {
+    FOUND.forEach(f => {
+      const b = base(f);
+      S.piles[f].forEach((c, i) => { pos[c] = { x: b.x, y: b.y, z: 200 + i }; });
+    });
+    const avail = Math.max(0, L.H - L.tabY - L.ch - L.gap);
+    TAB.forEach(t => {
       const p = S.piles[t];
-      const down = L.ch * 0.1;
-      const up = L.ch * 0.3;
-      let need = 0;
-      for (let i = 0; i < p.length - 1; i++) need += S.up[p[i]] ? up : down;
-      const f = need > avail ? Math.max(0, avail) / need : 1; // pitkä sarake tiivistetään
-      let y = L.tabY;
+      const b = base(t);
+      let down = L.ch * 0.1;
+      let up = L.ch * 0.3;
+      let nd = 0;
+      let nu = 0;
+      for (let i = 0; i < p.length - 1; i++) S.up[p[i]] ? nu++ : nd++;
+      // Pitkä sarake tiivistetään: ensin selkäpuoliset, sitten vasta näkyvät kortit
+      if (nd * down + nu * up > avail) {
+        const minDown = L.ch * 0.05;
+        if (nd * minDown + nu * up <= avail) down = (avail - nu * up) / nd;
+        else { down = Math.min(down, minDown); up = nu ? Math.max(0, avail - nd * down) / nu : up; }
+      }
+      let y = b.y;
       p.forEach((c, i) => {
-        pos[c] = { x: colX(k), y: Math.round(y), z: 300 + i };
-        y += (S.up[c] ? up : down) * f;
+        pos[c] = { x: b.x, y: Math.round(y), z: 300 + i };
+        y += S.up[c] ? up : down;
       });
     });
     return pos;
@@ -353,8 +391,7 @@
     const id = gameId;
     busy = true;
     drag = null;
-    const sx = colX(0);
-    const sy = L.top;
+    const { x: sx, y: sy } = base('stock');
     board.classList.add('instant');
     els.forEach(el => {
       clearTimeout(el._zt);
@@ -463,11 +500,10 @@
     let bestArea = 0;
     for (const to of [...FOUND, ...TAB]) {
       if (to === d.from || !canPlace(d.cards, to)) continue;
-      const k = to[0] === 'f' ? 3 + Number(to[1]) : Number(to[1]);
-      const py = to[0] === 'f' ? L.top : L.tabY;
+      const b = base(to);
       const t = last(S.piles[to]);
-      const h = to[0] === 't' && t !== undefined ? els[t]._y - py + L.ch : L.ch;
-      const a = overlapArea(x, y, colX(k), py, L.cw, h);
+      const h = to[0] === 't' && t !== undefined ? els[t]._y - b.y + L.ch : L.ch;
+      const a = overlapArea(x, y, b.x, b.y, L.cw, h);
       if (a > bestArea) { bestArea = a; best = to; }
     }
     return best;
