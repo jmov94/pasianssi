@@ -14,7 +14,7 @@ aloitusnäytölle ja pelata myös ilman verkkoyhteyttä.
 - Kun kaikki kortit ovat näkyvissä ja pakka on tyhjä, peli siirtää loput kortit itse pohjapinoihin.
 - Peli tallentuu automaattisesti, ja kesken jäänyt peli jatkuu, kun sovelluksen avaa uudelleen.
   Voitot ja paras aika tallentuvat laitteelle.
-- Äänet syntetoidaan selaimessa (ei äänitiedostoja). Kaiutinnapista ne saa pois päältä. iPhonessa
+- Äänet syntetisoidaan selaimessa (ei äänitiedostoja). Kaiutinnapista ne saa pois päältä. iPhonessa
   äänet noudattavat äänetöntä tilaa eivätkä katkaise taustalla soivaa musiikkia.
 - Näppäimistöllä: välilyönti nostaa pakasta, `U` tai `Ctrl+Z` kumoaa, `N` aloittaa uuden pelin.
 
