@@ -737,8 +737,8 @@
     newGame(1);
   }
 
-  // iPhonen Koti-valikko-sovellus: iOS 26 vähentää tilapalkin näkymän korkeudesta, vaikka sivu
-  // ulottuu sen alle, joten alareunaan jäi tyhjä kaista. CSS venyttää sivun koko näytölle (100lvh).
+  // iPhonen Koti-valikko-sovellus (CSS:n .ios-app). Tilapalkki on index.html:ssä tyyliä 'default':
+  // läpikuultavalla tyylillä iOS 26 jättää alareunaan tilapalkin korkuisen raon (WebKit 301108).
   document.documentElement.classList.toggle('ios-app', navigator.standalone === true);
 
   new ResizeObserver(() => {

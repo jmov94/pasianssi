@@ -38,14 +38,10 @@ body {
   overscroll-behavior: none;
 }
 
-/* iPhonen Koti-valikko-sovellus: iOS 26 sumentaa tilapalkin alla olevan alueen ja vähän sen alapuoleltakin.
-   Lisätään ylös puuta, jotta pelilauta alkaa vasta sumennuksen alapuolelta (vaakatasossa inset on 0). */
-.ios-app body {
-  padding-top: calc(env(safe-area-inset-top) * 2);
-  /* iOS 26 ilmoittaa näkymän tilapalkin verran liian lyhyeksi; lvh on koko näytön korkeus */
-  bottom: auto;
-  height: 100lvh;
-}
+/* iPhonen Koti-valikko-sovellus, joka on asennettu läpikuultavalla tilapalkilla (vanha asetus):
+   iOS 26 sumentaa tilapalkin alla olevan alueen, joten pelilauta siirretään sumennuksen alapuolelle.
+   Nykyisellä tilapalkkityylillä (default) sivu alkaa tilapalkin alta ja inset on 0, eli tämä ei vaikuta. */
+.ios-app body { padding-top: calc(env(safe-area-inset-top) * 2); }
 
 /* Pelilauta: vihreä huopa upotettuna puukehykseen. Kortit ja paikat sijoitetaan JS:llä.
    Loven / Dynamic Islandin ja kotipalkin alue jää puun alle. */
