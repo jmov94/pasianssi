@@ -72,6 +72,91 @@
     try { localStorage.setItem(STATS_KEY, JSON.stringify(st)); } catch { /* ei tallennusta */ }
   }
 
+  // --- Äänet: syntetisoidaan Web Audiolla, joten äänitiedostoja ei tarvita -----
+
+  const sound = (() => {
+    const KEY = 'pasianssi.aanet';
+    let ctx = null;
+    let noise = null;
+    let on = true;
+    try { on = localStorage.getItem(KEY) !== '0'; } catch { /* oletus: päällä */ }
+
+    // Selaimet sallivat äänet vasta käyttäjän kosketuksen jälkeen
+    function unlock() {
+      if (!on) return;
+      try {
+        if (!ctx) {
+          // 'ambient': noudattaa iPhonen äänetöntä tilaa eikä katkaise taustalla soivaa musiikkia
+          if (navigator.audioSession) navigator.audioSession.type = 'ambient';
+          ctx = new (window.AudioContext || window.webkitAudioContext)();
+          noise = ctx.createBuffer(1, ctx.sampleRate / 2, ctx.sampleRate);
+          const d = noise.getChannelData(0);
+          for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+        }
+        if (ctx.state === 'suspended') ctx.resume();
+      } catch { ctx = null; }
+    }
+
+    function envelope(g, t, dur, peak) {
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(peak, t + 0.005);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    }
+
+    // Suodatettu kohinapurske: kortin rapsahdus ja suhahdus
+    function hiss(t, dur, freq, q, peak, type = 'bandpass', freqEnd = 0) {
+      const src = ctx.createBufferSource();
+      src.buffer = noise;
+      const f = ctx.createBiquadFilter();
+      f.type = type;
+      f.Q.value = q;
+      f.frequency.setValueAtTime(freq, t);
+      if (freqEnd) f.frequency.exponentialRampToValueAtTime(freqEnd, t + dur);
+      const g = ctx.createGain();
+      envelope(g, t, dur, peak);
+      src.connect(f).connect(g).connect(ctx.destination);
+      src.start(t, Math.random() * 0.2);
+      src.stop(t + dur + 0.02);
+    }
+
+    function tone(t, freq, dur, peak, type = 'sine') {
+      const o = ctx.createOscillator();
+      o.type = type;
+      o.frequency.setValueAtTime(freq, t);
+      const g = ctx.createGain();
+      envelope(g, t, dur, peak);
+      o.connect(g).connect(ctx.destination);
+      o.start(t);
+      o.stop(t + dur + 0.02);
+    }
+
+    const sounds = {
+      place: t => { hiss(t, 0.05, 1600, 0.9, 0.35); tone(t, 150, 0.05, 0.12, 'triangle'); },
+      flip: t => hiss(t, 0.035, 3500, 1.2, 0.18, 'highpass'),
+      draw: t => hiss(t, 0.09, 900, 0.7, 0.22, 'bandpass', 3200),
+      recycle: t => hiss(t, 0.28, 3000, 0.6, 0.2, 'bandpass', 600),
+      deal: t => hiss(t, 0.03, 2600, 1, 0.16),
+      invalid: t => tone(t, 120, 0.14, 0.18, 'triangle'),
+      // Pohjapinoon: rapsahdus ja kevyt kilahdus, joka nousee kortin arvon mukana
+      foundation: (t, r) => { sounds.place(t); tone(t + 0.01, 523.25 * Math.pow(2, (r - 1) / 12), 0.25, 0.07); },
+      win: t => [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f, i) => tone(t + i * 0.11, f, 0.5, 0.09)),
+    };
+
+    return {
+      unlock,
+      get on() { return on; },
+      set on(v) {
+        on = v;
+        try { localStorage.setItem(KEY, v ? '1' : '0'); } catch { /* ei tallennusta */ }
+        if (v) unlock();
+      },
+      play(name, delay = 0, arg) {
+        if (!on || !ctx) return;
+        try { sounds[name](ctx.currentTime + delay, arg); } catch { /* ääni ei ole välttämätön */ }
+      },
+    };
+  })();
+
   // --- Säännöt ----------------------------------------------------------
 
   function newGame(draw) {
@@ -154,9 +239,15 @@
 
   function move(from, i, to) {
     snapshot();
+    const card = S.piles[from][i];
     S.piles[to].push(...S.piles[from].splice(i));
     const t = last(S.piles[from]);
-    if (from[0] === 't' && t !== undefined) S.up[t] = true;
+    if (to[0] === 'f') sound.play('foundation', 0, rank(card));
+    else sound.play('place');
+    if (from[0] === 't' && t !== undefined && !S.up[t]) {
+      S.up[t] = true;
+      sound.play('flip', 0.12);
+    }
     afterMove();
   }
 
@@ -165,6 +256,7 @@
     const { stock, waste } = S.piles;
     if (!stock.length && !waste.length) return;
     snapshot();
+    sound.play(stock.length ? 'draw' : 'recycle');
     if (stock.length) {
       for (let n = 0; n < S.draw && stock.length; n++) {
         const c = stock.pop();
@@ -199,6 +291,7 @@
   function undo() {
     if (busy || S.won || !history.length) return;
     const h = JSON.parse(history.pop());
+    sound.play('draw');
     S.piles = h.piles;
     S.up = h.up;
     S.moves = h.moves;
@@ -232,6 +325,7 @@
   }
 
   function win() {
+    sound.play('win', 0.3);
     S.won = true;
     busy = false;
     history = [];
@@ -421,6 +515,7 @@
         el._y = p.y;
         el._z = p.z;
         el.style.transform = `translate(${p.x}px, ${p.y}px)`;
+        sound.play('deal', delay / 1000);
         setTimeout(() => {
           if (id !== gameId) return;
           el.style.transitionDelay = '';
@@ -465,30 +560,8 @@
       ? `Voitot ${st.won} / ${st.played}` + (st.best ? ` · paras aika ${fmt(st.best)}` : '')
       : '';
     $('dlg-offline').textContent = offlineStatus();
-    $('dlg-debug').textContent = navigator.standalone === true ? screenInfo() : '';
     $('close').textContent = won ? 'Sulje' : 'Peruuta';
     overlay.hidden = false;
-  }
-
-  // Väliaikainen: iPhonen ilmoittamat mitat alareunan raon selvittämiseksi
-  function screenInfo() {
-    const probe = css => {
-      const d = document.createElement('div');
-      d.style.cssText = 'position:fixed;left:0;top:0;width:1px;visibility:hidden;' + css;
-      document.body.appendChild(d);
-      const r = d.getBoundingClientRect();
-      const cs = getComputedStyle(d);
-      const out = { h: Math.round(r.height), pt: parseFloat(cs.paddingTop), pb: parseFloat(cs.paddingBottom) };
-      d.remove();
-      return out;
-    };
-    const ins = probe('padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)');
-    const b = document.body.getBoundingClientRect();
-    const vv = window.visualViewport;
-    return `ikkuna ${innerWidth}×${innerHeight} · näyttö ${screen.width}×${screen.height}` +
-      ` · vv ${vv ? Math.round(vv.height) + '/' + Math.round(vv.offsetTop) : '-'}` +
-      ` · vh ${probe('height:100vh').h} lvh ${probe('height:100lvh').h} svh ${probe('height:100svh').h}` +
-      ` · body ${Math.round(b.top)}–${Math.round(b.bottom)} · turva ${ins.pt}/${ins.pb}`;
   }
 
   function offlineStatus() {
@@ -504,7 +577,10 @@
   function tap(from, i) {
     const to = findTarget(from, i);
     if (to) move(from, i, to);
-    else S.piles[from].slice(i).forEach(c => restartAnim(els[c], 'shake'));
+    else {
+      sound.play('invalid');
+      S.piles[from].slice(i).forEach(c => restartAnim(els[c], 'shake'));
+    }
   }
 
   function overlapArea(ax, ay, bx, by, bw, bh) {
@@ -600,6 +676,15 @@
 
   $('new').addEventListener('click', () => showDialog(false));
   $('undo').addEventListener('click', undo);
+  const soundBtn = $('sound');
+  const showSound = () => soundBtn.setAttribute('aria-pressed', String(sound.on));
+  showSound();
+  soundBtn.addEventListener('click', () => {
+    sound.on = !sound.on;
+    showSound();
+    sound.play('place');
+  });
+  for (const ev of ['pointerdown', 'touchend', 'click']) document.addEventListener(ev, sound.unlock, true);
   $('close').addEventListener('click', hideDialog);
   overlay.addEventListener('click', e => { if (e.target === overlay) hideDialog(); });
   overlay.querySelectorAll('[data-draw]').forEach(b => b.addEventListener('click', () => {
@@ -652,25 +737,9 @@
     newGame(1);
   }
 
-  // iPhonen Koti-valikko-sovellus (iOS 26): näkymän korkeus voi jäädä tilapalkin verran
-  // liian lyhyeksi, jolloin alareunaan jää tyhjä kaista. Venytetään sivu näytön korkuiseksi.
-  const iosApp = navigator.standalone === true;
-  document.documentElement.classList.toggle('ios-app', iosApp);
-  function fitScreen() {
-    if (!iosApp) return;
-    const body = document.body;
-    body.style.bottom = '';
-    body.style.height = '';
-    const landscape = matchMedia('(orientation: landscape)').matches;
-    const sh = landscape ? Math.min(screen.width, screen.height) : Math.max(screen.width, screen.height);
-    if (body.getBoundingClientRect().height < sh - 1) {
-      body.style.bottom = 'auto';
-      body.style.height = sh + 'px';
-    }
-  }
-  fitScreen();
-  window.addEventListener('resize', fitScreen);
-  window.addEventListener('orientationchange', () => setTimeout(fitScreen, 300));
+  // iPhonen Koti-valikko-sovellus: iOS 26 vähentää tilapalkin näkymän korkeudesta, vaikka sivu
+  // ulottuu sen alle, joten alareunaan jäi tyhjä kaista. CSS venyttää sivun koko näytölle (100lvh).
+  document.documentElement.classList.toggle('ios-app', navigator.standalone === true);
 
   new ResizeObserver(() => {
     if (board.clientWidth === L.W && board.clientHeight === L.H) return;

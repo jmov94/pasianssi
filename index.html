@@ -21,6 +21,13 @@
   <nav class="bar">
     <button id="new" type="button">Uusi peli</button>
     <button id="undo" type="button">Kumoa</button>
+    <button id="sound" type="button" aria-label="Äänet" aria-pressed="true">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3.5 9h4l5-4.2v14.4l-5-4.2h-4z" fill="currentColor"/>
+        <path class="waves" d="M15.5 8.6a4.8 4.8 0 0 1 0 6.8M18.2 6a8.6 8.6 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path class="mute" d="M16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
     <div class="info">
       <span id="moves">Siirrot 0</span>
       <span id="time">0:00</span>
@@ -33,7 +40,6 @@
       <p id="dlg-text"></p>
       <p id="dlg-stats" class="stats"></p>
       <p id="dlg-offline" class="stats"></p>
-      <p id="dlg-debug" class="debug"></p>
       <div class="buttons">
         <button type="button" data-draw="1">Nosta 1 kortti</button>
         <button type="button" data-draw="3">Nosta 3 korttia</button>
