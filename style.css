@@ -236,6 +236,43 @@ body {
 .dialog p { margin: 0 0 .6rem; color: #5a4632; }
 .dialog p:empty { display: none; }
 .dialog .stats { font-size: .9rem; color: #7a6650; margin-bottom: 1.1rem; }
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .6rem;
+  margin: .2rem 0 .2rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.toggle input {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: none;
+  width: 2.6rem;
+  height: 1.5rem;
+  margin: 0;
+  border-radius: 999px;
+  background: #cdbfa9;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, .35);
+  position: relative;
+  cursor: pointer;
+  transition: background .15s;
+}
+.toggle input::after {
+  content: "";
+  position: absolute;
+  top: .15rem;
+  left: .15rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 50%;
+  background: #fffaf2;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .4);
+  transition: transform .15s;
+}
+.toggle input:checked { background: var(--felt); }
+.toggle input:checked::after { transform: translateX(1.1rem); }
 .dialog .buttons { display: grid; gap: .6rem; margin-top: 1rem; }
 .dialog button { font-size: 1rem; padding: .75rem; border-radius: 10px; }
 .dialog button.secondary { font-weight: 600; filter: brightness(1.12) saturate(.8); }

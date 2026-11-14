@@ -159,27 +159,43 @@
 
   // --- Säännöt ----------------------------------------------------------
 
+  // --- Voitettavat jaot ------------------------------------------------------
+  // ratkaistavat.js sisältää siemenluvut jaoille, jotka ratkaisija (tyokalut/ratkaistavat.js)
+  // on todennut voitettaviksi. Viimeksi pelatut muistetaan, jotta sama jako ei toistu pian.
+  const WINNABLE_KEY = 'pasianssi.voitettavat';
+  const RECENT_KEY = 'pasianssi.viimeiset';
+
+  function winnableOn() {
+    try { return localStorage.getItem(WINNABLE_KEY) !== '0'; } catch { return true; }
+  }
+
+  function pickSeed(draw, winnable) {
+    const list = winnable && self.RATKAISTAVAT && self.RATKAISTAVAT[draw];
+    if (!list || !list.length) {
+      const a = new Uint32Array(1);
+      crypto.getRandomValues(a);
+      return a[0];
+    }
+    let recent = [];
+    try { recent = JSON.parse(localStorage.getItem(RECENT_KEY)) || []; } catch { /* tyhjä */ }
+    const avoid = new Set(recent);
+    let seed = list[Math.floor(Math.random() * list.length)];
+    for (let i = 0; i < 20 && avoid.has(seed); i++) seed = list[Math.floor(Math.random() * list.length)];
+    recent.push(seed);
+    try { localStorage.setItem(RECENT_KEY, JSON.stringify(recent.slice(-Math.floor(list.length / 2)))); } catch { /* ei tallennusta */ }
+    return seed;
+  }
+
   function newGame(draw) {
     gameId++;
     board.classList.remove('scatter');
-    const deck = [...Array(52).keys()];
-    for (let i = deck.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [deck[i], deck[j]] = [deck[j], deck[i]];
-    }
-    const piles = { stock: [], waste: [] };
-    for (const k of [...FOUND, ...TAB]) piles[k] = [];
-    const up = Array(52).fill(false);
-    // Jaetaan rivi kerrallaan kuten oikeassa pelissä, ylin kortti kuvapuoli ylöspäin
-    for (let r = 0; r < 7; r++) {
-      for (let k = r; k < 7; k++) {
-        const c = deck.pop();
-        piles[TAB[k]].push(c);
-        up[c] = r === k;
-      }
-    }
-    piles.stock = deck;
-    S = { piles, up, moves: 0, draw, elapsed: 0, won: false, counted: false };
+    const winnable = winnableOn();
+    const seed = pickSeed(draw, winnable);
+    const d = Jako.deal(seed);
+    const piles = { stock: d.stock, waste: [] };
+    for (const k of FOUND) piles[k] = [];
+    TAB.forEach((k, i) => { piles[k] = d.tableau[i]; });
+    S = { piles, up: d.up, moves: 0, draw, elapsed: 0, won: false, counted: false, seed, winnable };
     history = [];
     save();
     deal();
@@ -560,6 +576,7 @@
       ? `Voitot ${st.won} / ${st.played}` + (st.best ? ` · paras aika ${fmt(st.best)}` : '')
       : '';
     $('dlg-offline').textContent = offlineStatus();
+    $('winnable').checked = winnableOn();
     $('close').textContent = won ? 'Sulje' : 'Peruuta';
     overlay.hidden = false;
   }
@@ -686,6 +703,9 @@
   });
   for (const ev of ['pointerdown', 'touchend', 'click']) document.addEventListener(ev, sound.unlock, true);
   $('close').addEventListener('click', hideDialog);
+  $('winnable').addEventListener('change', e => {
+    try { localStorage.setItem(WINNABLE_KEY, e.target.checked ? '1' : '0'); } catch { /* ei tallennusta */ }
+  });
   overlay.addEventListener('click', e => { if (e.target === overlay) hideDialog(); });
   overlay.querySelectorAll('[data-draw]').forEach(b => b.addEventListener('click', () => {
     hideDialog();

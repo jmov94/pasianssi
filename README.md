@@ -10,6 +10,8 @@ aloitusnäytölle ja pelata myös ilman verkkoyhteyttä.
 - Napauta pakkaa nostaaksesi kortteja. Kun pakka loppuu, napauta tyhjää paikkaa (↻), niin
   poistopino kääntyy takaisin pakaksi.
 - **Uusi peli**: valitse, nostetaanko 1 vai 3 korttia kerrallaan.
+- **Vain voitettavat jaot** (oletuksena päällä): jako valitaan 3000 valmiiksi tarkistetusta
+  jaosta per tila. Ne on todettu voitettaviksi ja suoraviivaisiksi, katso *Voitettavat jaot* alla.
 - **Kumoa** peruu edellisen siirron.
 - Kun kaikki kortit ovat näkyvissä ja pakka on tyhjä, peli siirtää loput kortit itse pohjapinoihin.
 - Peli tallentuu automaattisesti, ja kesken jäänyt peli jatkuu, kun sovelluksen avaa uudelleen.
@@ -47,6 +49,19 @@ hetki. iPhonessa Koti-valikon sovelluksella on oma tallennustilansa erillään S
 offline-tiedostot tallentuvat vasta tällä avauksella. *Uusi peli* -ikkunassa lukee
 **✓ Toimii ilman verkkoa**, kun sovellus on valmis käytettäväksi ilman verkkoa.
 
+## Voitettavat jaot
+
+Jako arvotaan siemenluvusta (`jako.js`), joten sama siemen tuottaa aina saman jaon.
+`tyokalut/ratkaistavat.js` pelaa jakoja läpi ratkaisijalla, joka näkee myös kuvapuoli alaspäin
+olevat kortit, ja tallentaa voitettavien jakojen siemenet tiedostoon `ratkaistavat.js`. Jokainen
+ratkaisu pelataan vielä erikseen läpi pelin säännöillä ennen hyväksyntää. Mukaan otetaan vain
+jaot, jotka ratkeavat vähällä etsimisellä: noin 3/4 kaikista jaoista on voitettavia, mutta osa
+vain hyvin tarkalla pelillä.
+
+```
+node tyokalut/ratkaistavat.js 3000
+```
+
 ## Päivittäminen
 
 Asennettu sovellus avautuu heti välimuistista ja hakee uudet tiedostot taustalla, joten muutokset
@@ -62,4 +77,7 @@ näkyvät seuraavalla avauskerralla. Jos lisäät tai poistat tiedostoja, päivi
 | `app.js` | Pelilogiikka, piirto, kosketus ja tallennus |
 | `sw.js` | Offline-tuki (service worker) |
 | `manifest.webmanifest`, `icons/` | Sovelluksen nimi, värit ja kuvakkeet |
+| `jako.js` | Jaon arpominen siemenluvusta |
+| `ratkaistavat.js` | Voitettavien jakojen siemenet (generoitu) |
+| `tyokalut/ratkaistavat.js` | Ratkaisija, joka tuottaa `ratkaistavat.js`:n |
 | `wood.svg` | Puureunan syykuvio (piirretään selaimessa, ei kuvatiedostoa) |

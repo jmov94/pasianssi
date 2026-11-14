@@ -1,11 +1,13 @@
 // Offline-tuki: tiedostot tallennetaan välimuistiin ja näytetään sieltä heti.
 // Uusi versio haetaan taustalla, ja se näkyy seuraavalla avauskerralla.
-const CACHE = 'pasianssi-v10';
+const CACHE = 'pasianssi-v11';
 const FILES = [
   './',
   'index.html',
   'style.css',
   'app.js',
+  'jako.js',
+  'ratkaistavat.js',
   'wood.svg',
   'manifest.webmanifest',
   'icons/icon.svg',
