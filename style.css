@@ -9,6 +9,7 @@
   --back: #1e4fa3;
   --back-2: #183f85;
   --wood: #6b4224;
+  --wood-edge: #3b2414; /* tumma reuna: myös väri, jolla iOS täyttää näkymän ulkopuolisen alueen */
   --wood-text: #f4e7d3;
   --rail: clamp(6px, 1.6vmin, 12px); /* puureunan leveys huovan ympärillä */
   color-scheme: dark;
@@ -16,6 +17,7 @@
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; height: 100%; }
+html { background-color: var(--wood-edge); }
 
 body {
   position: fixed;
@@ -23,7 +25,7 @@ body {
   display: flex;
   flex-direction: column;
   padding-top: env(safe-area-inset-top);
-  background: var(--wood) url(wood.svg) 0 0 / 480px 480px;
+  background: var(--wood-edge) url(wood.svg) 0 0 / 480px 480px;
   color: var(--text);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
   user-select: none;
@@ -129,10 +131,13 @@ body {
   gap: .5rem;
   padding: .5rem calc(.75rem + env(safe-area-inset-right)) calc(.5rem + env(safe-area-inset-bottom))
     calc(.75rem + env(safe-area-inset-left));
+  /* Alareuna tummuu, jotta se sulautuu iOS:n mahdolliseen tasaväriseen alakaistaan */
+  background: linear-gradient(to bottom, transparent 30%, var(--wood-edge));
 }
 /* Napit: koholla oleva vaalea puulaatta, johon teksti on kaiverrettu.
    Painettaessa laatta painuu sisään; pois käytöstä oleva nappi on pelkkä kaiverrus pinnassa. */
-.bar button {
+.bar button,
+.dialog button {
   font: inherit;
   font-size: .95rem;
   font-weight: 700;
@@ -154,7 +159,8 @@ body {
   cursor: pointer;
   transition: transform .06s, box-shadow .06s;
 }
-.bar button:active:not(:disabled) {
+.bar button:active:not(:disabled),
+.dialog button:active {
   transform: translateY(1px);
   background:
     linear-gradient(rgba(255, 228, 185, .2), rgba(255, 215, 160, .08)),
@@ -191,6 +197,7 @@ body {
     flex-direction: column;
     align-items: stretch;
     padding: .6rem calc(.5rem + env(safe-area-inset-right)) calc(.6rem + env(safe-area-inset-bottom)) .5rem;
+    background: none;
   }
   .bar button { padding: .55rem .8rem; }
   .info { margin: auto 0 0; flex-direction: column; align-items: center; gap: .3rem; font-size: .9rem; }
@@ -211,24 +218,16 @@ body {
   width: min(20rem, 100%);
   padding: 1.4rem;
   border-radius: 16px;
-  background: #fff;
-  color: var(--black);
+  background: #f7efe2;
+  color: #2b1709;
   text-align: center;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, .4);
+  box-shadow: 0 0 0 1px rgba(60, 30, 10, .35), 0 10px 40px rgba(0, 0, 0, .5);
 }
 .dialog h1 { margin: 0 0 .4rem; font-size: 1.4rem; }
-.dialog p { margin: 0 0 .6rem; color: #4d5560; }
+.dialog p { margin: 0 0 .6rem; color: #5a4632; }
 .dialog p:empty { display: none; }
-.dialog .stats { font-size: .9rem; color: #6b7480; margin-bottom: 1.1rem; }
-.dialog .buttons { display: grid; gap: .5rem; margin-top: 1rem; }
-.dialog button {
-  font: inherit;
-  font-weight: 600;
-  padding: .75rem;
-  border: 0;
-  border-radius: 10px;
-  background: var(--felt);
-  color: #fff;
-  cursor: pointer;
-}
-.dialog button.secondary { background: #e9ecef; color: var(--black); }
+.dialog .stats { font-size: .9rem; color: #7a6650; margin-bottom: 1.1rem; }
+.dialog .debug { font: .68rem/1.35 ui-monospace, Menlo, monospace; color: #9a8670; }
+.dialog .buttons { display: grid; gap: .6rem; margin-top: 1rem; }
+.dialog button { font-size: 1rem; padding: .75rem; border-radius: 10px; }
+.dialog button.secondary { font-weight: 600; filter: brightness(1.12) saturate(.8); }

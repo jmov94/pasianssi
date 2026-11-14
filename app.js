@@ -465,8 +465,30 @@
       ? `Voitot ${st.won} / ${st.played}` + (st.best ? ` · paras aika ${fmt(st.best)}` : '')
       : '';
     $('dlg-offline').textContent = offlineStatus();
+    $('dlg-debug').textContent = navigator.standalone === true ? screenInfo() : '';
     $('close').textContent = won ? 'Sulje' : 'Peruuta';
     overlay.hidden = false;
+  }
+
+  // Väliaikainen: iPhonen ilmoittamat mitat alareunan raon selvittämiseksi
+  function screenInfo() {
+    const probe = css => {
+      const d = document.createElement('div');
+      d.style.cssText = 'position:fixed;left:0;top:0;width:1px;visibility:hidden;' + css;
+      document.body.appendChild(d);
+      const r = d.getBoundingClientRect();
+      const cs = getComputedStyle(d);
+      const out = { h: Math.round(r.height), pt: parseFloat(cs.paddingTop), pb: parseFloat(cs.paddingBottom) };
+      d.remove();
+      return out;
+    };
+    const ins = probe('padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)');
+    const b = document.body.getBoundingClientRect();
+    const vv = window.visualViewport;
+    return `ikkuna ${innerWidth}×${innerHeight} · näyttö ${screen.width}×${screen.height}` +
+      ` · vv ${vv ? Math.round(vv.height) + '/' + Math.round(vv.offsetTop) : '-'}` +
+      ` · vh ${probe('height:100vh').h} lvh ${probe('height:100lvh').h} svh ${probe('height:100svh').h}` +
+      ` · body ${Math.round(b.top)}–${Math.round(b.bottom)} · turva ${ins.pt}/${ins.pb}`;
   }
 
   function offlineStatus() {

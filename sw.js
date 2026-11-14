@@ -1,6 +1,6 @@
 // Offline-tuki: tiedostot tallennetaan välimuistiin ja näytetään sieltä heti.
 // Uusi versio haetaan taustalla, ja se näkyy seuraavalla avauskerralla.
-const CACHE = 'pasianssi-v6';
+const CACHE = 'pasianssi-v7';
 const FILES = [
   './',
   'index.html',
