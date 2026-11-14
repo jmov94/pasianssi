@@ -60,3 +60,4 @@ näkyvät seuraavalla avauskerralla. Jos lisäät tai poistat tiedostoja, päivi
 | `app.js` | Pelilogiikka, piirto, kosketus ja tallennus |
 | `sw.js` | Offline-tuki (service worker) |
 | `manifest.webmanifest`, `icons/` | Sovelluksen nimi, värit ja kuvakkeet |
+| `wood.svg` | Puureunan syykuvio (piirretään selaimessa, ei kuvatiedostoa) |

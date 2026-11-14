@@ -8,6 +8,9 @@
   --card: #fdfdfb;
   --back: #1e4fa3;
   --back-2: #183f85;
+  --wood: #6b4224;
+  --wood-text: #f4e7d3;
+  --rail: clamp(6px, 1.6vmin, 12px); /* puureunan leveys huovan ympärillä */
   color-scheme: dark;
 }
 
@@ -20,7 +23,7 @@ body {
   display: flex;
   flex-direction: column;
   padding-top: env(safe-area-inset-top);
-  background: radial-gradient(ellipse at 50% 25%, var(--felt), var(--felt-dark));
+  background: var(--wood) url(wood.svg) 0 0 / 480px 480px;
   color: var(--text);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
   user-select: none;
@@ -29,11 +32,18 @@ body {
   overscroll-behavior: none;
 }
 
-/* Pelilauta: kortit ja paikat sijoitetaan JS:llä (transform) */
-/* Kortit pysyvät poissa loven / Dynamic Islandin ja kotipalkin alta */
+/* Pelilauta: vihreä huopa upotettuna puukehykseen. Kortit ja paikat sijoitetaan JS:llä.
+   Loven / Dynamic Islandin ja kotipalkin alue jää puun alle. */
 #board {
   flex: 1;
-  margin: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left);
+  margin: var(--rail) max(var(--rail), env(safe-area-inset-right)) 0 max(var(--rail), env(safe-area-inset-left));
+  border-radius: 12px;
+  background: radial-gradient(ellipse at 50% 25%, var(--felt), var(--felt-dark));
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, .45),
+    inset 0 2px 14px rgba(0, 0, 0, .55),
+    0 1px 0 rgba(255, 235, 200, .18),
+    0 -1px 0 rgba(0, 0, 0, .35);
   position: relative;
   z-index: 0;
   overflow: hidden;
@@ -115,27 +125,28 @@ body {
   gap: .5rem;
   padding: .5rem calc(.75rem + env(safe-area-inset-right)) calc(.5rem + env(safe-area-inset-bottom))
     calc(.75rem + env(safe-area-inset-left));
-  background: rgba(0, 0, 0, .25);
 }
 .bar button {
   font: inherit;
   font-size: .95rem;
   font-weight: 600;
-  color: var(--text);
-  background: rgba(255, 255, 255, .13);
+  color: var(--wood-text);
+  background: rgba(30, 15, 5, .38);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .35), 0 1px 0 rgba(255, 235, 200, .15);
   border: 0;
   border-radius: 999px;
   padding: .55rem 1rem;
   white-space: nowrap;
   cursor: pointer;
 }
-.bar button:active { background: rgba(255, 255, 255, .24); }
+.bar button:active { background: rgba(30, 15, 5, .55); }
 .bar button:disabled { opacity: .4; cursor: default; }
 .info {
   margin-left: auto;
   display: flex;
   gap: .9rem;
-  color: var(--muted);
+  color: var(--wood-text);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .6);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -143,7 +154,9 @@ body {
 /* Matala vaakanäkymä (puhelin vaakatasossa): palkki pystyyn oikeaan reunaan */
 @media (orientation: landscape) and (max-height: 540px) {
   body { flex-direction: row; }
-  #board { margin: 0 0 env(safe-area-inset-bottom) env(safe-area-inset-left); }
+  #board {
+    margin: var(--rail) 0 max(var(--rail), env(safe-area-inset-bottom)) max(var(--rail), env(safe-area-inset-left));
+  }
   .bar {
     flex-direction: column;
     align-items: stretch;

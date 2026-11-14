@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="480">
+  <!-- Puun syy selaimen kohinasuodattimilla; stitchTiles tekee kuviosta saumattoman toistettaessa -->
+  <filter id="grain" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.0042 0.05" numOctaves="4" seed="11" stitchTiles="stitch"/>
+    <feColorMatrix values="0 0 0 0 .22  0 0 0 0 .11  0 0 0 0 .04  3 0 0 0 -1.4"/>
+  </filter>
+  <filter id="fine" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.0125 0.6" numOctaves="2" seed="3" stitchTiles="stitch"/>
+    <feColorMatrix values="0 0 0 0 .3  0 0 0 0 .16  0 0 0 0 .07  2 0 0 0 -.95"/>
+  </filter>
+  <rect width="480" height="480" fill="#7d4e2b"/>
+  <rect width="480" height="480" filter="url(#fine)"/>
+  <rect width="480" height="480" filter="url(#grain)"/>
+</svg>
