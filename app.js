@@ -630,6 +630,26 @@
     newGame(1);
   }
 
+  // iPhonen Koti-valikko-sovellus (iOS 26): näkymän korkeus voi jäädä tilapalkin verran
+  // liian lyhyeksi, jolloin alareunaan jää tyhjä kaista. Venytetään sivu näytön korkuiseksi.
+  const iosApp = navigator.standalone === true;
+  document.documentElement.classList.toggle('ios-app', iosApp);
+  function fitScreen() {
+    if (!iosApp) return;
+    const body = document.body;
+    body.style.bottom = '';
+    body.style.height = '';
+    const landscape = matchMedia('(orientation: landscape)').matches;
+    const sh = landscape ? Math.min(screen.width, screen.height) : Math.max(screen.width, screen.height);
+    if (body.getBoundingClientRect().height < sh - 1) {
+      body.style.bottom = 'auto';
+      body.style.height = sh + 'px';
+    }
+  }
+  fitScreen();
+  window.addEventListener('resize', fitScreen);
+  window.addEventListener('orientationchange', () => setTimeout(fitScreen, 300));
+
   new ResizeObserver(() => {
     if (board.clientWidth === L.W && board.clientHeight === L.H) return;
     if (drag) {
@@ -652,6 +672,15 @@
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => { /* ilman offline-tukea */ });
+    // Uusi versio otetaan käyttöön heti, kun se on ladattu: peli tallennetaan ja sivu ladataan uudelleen
+    const hadController = !!navigator.serviceWorker.controller;
+    let reloading = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadController || reloading) return;
+      reloading = true;
+      save();
+      location.reload();
+    });
     // Pyydetään, ettei selain siivoa tallennettuja tiedostoja pois
     if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
   }
