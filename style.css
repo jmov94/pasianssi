@@ -15,7 +15,11 @@
   color-scheme: dark;
 }
 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation; /* ei tuplanäpäytyszoomausta (pelilaudalla touch-action: none) */
+}
 html, body { margin: 0; height: 100%; }
 html { background-color: var(--wood-edge); }
 
