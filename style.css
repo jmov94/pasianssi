@@ -126,21 +126,47 @@ body {
   padding: .5rem calc(.75rem + env(safe-area-inset-right)) calc(.5rem + env(safe-area-inset-bottom))
     calc(.75rem + env(safe-area-inset-left));
 }
+/* Napit: koholla oleva vaalea puulaatta, johon teksti on kaiverrettu.
+   Painettaessa laatta painuu sisään; pois käytöstä oleva nappi on pelkkä kaiverrus pinnassa. */
 .bar button {
   font: inherit;
   font-size: .95rem;
-  font-weight: 600;
-  color: var(--wood-text);
-  background: rgba(30, 15, 5, .38);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .35), 0 1px 0 rgba(255, 235, 200, .15);
+  font-weight: 700;
+  letter-spacing: .01em;
+  color: #2b1709;
+  text-shadow: 0 1px 0 rgba(255, 238, 210, .45);
+  background:
+    linear-gradient(rgba(255, 228, 185, .42), rgba(255, 215, 160, .18) 55%, rgba(60, 30, 10, .12)),
+    var(--wood) url(wood.svg) 30px 70px / 480px 480px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 215, .55),
+    inset 0 -2px 0 rgba(50, 25, 8, .35),
+    0 0 0 1px rgba(35, 18, 6, .7),
+    0 2px 4px rgba(0, 0, 0, .45);
   border: 0;
-  border-radius: 999px;
+  border-radius: 9px;
   padding: .55rem 1rem;
   white-space: nowrap;
   cursor: pointer;
+  transition: transform .06s, box-shadow .06s;
 }
-.bar button:active { background: rgba(30, 15, 5, .55); }
-.bar button:disabled { opacity: .4; cursor: default; }
+.bar button:active:not(:disabled) {
+  transform: translateY(1px);
+  background:
+    linear-gradient(rgba(255, 228, 185, .2), rgba(255, 215, 160, .08)),
+    var(--wood) url(wood.svg) 30px 70px / 480px 480px;
+  box-shadow:
+    inset 0 2px 5px rgba(30, 14, 4, .6),
+    0 0 0 1px rgba(35, 18, 6, .7),
+    0 1px 0 rgba(255, 235, 200, .15);
+}
+.bar button:disabled {
+  cursor: default;
+  color: rgba(25, 12, 4, .7);
+  text-shadow: 0 1px 0 rgba(255, 230, 190, .22);
+  background: rgba(25, 12, 4, .12);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, .4), 0 1px 0 rgba(255, 235, 200, .12);
+}
 .info {
   margin-left: auto;
   display: flex;
