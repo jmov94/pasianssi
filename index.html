@@ -13,6 +13,13 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <script>
+    // Teema heti, ettei sivu välähdä väärän värisenä. Oletus: tumma, jos puhelin on tummassa tilassa.
+    try {
+      document.documentElement.dataset.theme = localStorage.getItem('pasianssi.teema') ||
+        (matchMedia('(prefers-color-scheme: dark)').matches ? 'tumma' : 'vihrea');
+    } catch (e) { document.documentElement.dataset.theme = 'vihrea'; }
+  </script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -44,6 +51,11 @@
         <input type="checkbox" id="winnable">
         <span>Vain voitettavat jaot</span>
       </label>
+      <div class="themes" role="radiogroup" aria-label="Teema">
+        <button type="button" role="radio" data-theme="vihrea"><span class="swatch"></span>Vihreä</button>
+        <button type="button" role="radio" data-theme="sininen"><span class="swatch"></span>Sininen</button>
+        <button type="button" role="radio" data-theme="tumma"><span class="swatch"></span>Tumma</button>
+      </div>
       <div class="buttons">
         <button type="button" data-draw="1">Nosta 1 kortti</button>
         <button type="button" data-draw="3">Nosta 3 korttia</button>

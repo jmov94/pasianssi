@@ -13,6 +13,8 @@ aloitusnäytölle ja pelata myös ilman verkkoyhteyttä.
 - **Vain voitettavat jaot** (oletuksena päällä): jako valitaan 3000 valmiiksi tarkistetusta
   jaosta per tila. Ne on todettu voitettaviksi ja suoraviivaisiksi, katso *Voitettavat jaot* alla.
 - **Kumoa** peruu edellisen siirron.
+- **Teema**: vihreä, sininen tai tumma (Uusi peli -ikkunassa). Jos teemaa ei ole valittu ja
+  puhelin on tummassa tilassa, käytetään tummaa teemaa.
 - Kun kaikki kortit ovat näkyvissä ja pakka on tyhjä, peli siirtää loput kortit itse pohjapinoihin.
 - Peli tallentuu automaattisesti, ja kesken jäänyt peli jatkuu, kun sovelluksen avaa uudelleen.
   Voitot ja paras aika tallentuvat laitteelle.

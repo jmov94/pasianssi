@@ -703,6 +703,20 @@
   });
   for (const ev of ['pointerdown', 'touchend', 'click']) document.addEventListener(ev, sound.unlock, true);
   $('close').addEventListener('click', hideDialog);
+  // Teema: vaihtuu heti, valinta muistetaan (index.html asettaa sen jo ennen sivun piirtoa)
+  const THEME_BAR = { vihrea: '#4a2c17', sininen: '#4a2c17', tumma: '#160e09' };
+  const themeButtons = overlay.querySelectorAll('.themes button');
+  function applyTheme(theme) {
+    if (!THEME_BAR[theme]) theme = 'vihrea';
+    document.documentElement.dataset.theme = theme;
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', THEME_BAR[theme]);
+    themeButtons.forEach(b => b.setAttribute('aria-checked', String(b.dataset.theme === theme)));
+  }
+  applyTheme(document.documentElement.dataset.theme);
+  themeButtons.forEach(b => b.addEventListener('click', () => {
+    applyTheme(b.dataset.theme);
+    try { localStorage.setItem('pasianssi.teema', b.dataset.theme); } catch { /* ei tallennusta */ }
+  }));
   $('winnable').addEventListener('change', e => {
     try { localStorage.setItem(WINNABLE_KEY, e.target.checked ? '1' : '0'); } catch { /* ei tallennusta */ }
   });
